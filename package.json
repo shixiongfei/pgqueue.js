@@ -1,0 +1,41 @@
+{
+  "name": "pgqueue",
+  "version": "0.1.0",
+  "description": "A reliable message queue base on PostgreSQL",
+  "main": "./lib/src/index.js",
+  "types": "./lib/src/index.d.ts",
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc -w",
+    "test": "tsc && node lib/test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shixiongfei/pgqueue.js.git"
+  },
+  "keywords": [
+    "postgresql",
+    "queue"
+  ],
+  "author": "shixiongfei",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/shixiongfei/pgqueue.js/issues"
+  },
+  "homepage": "https://github.com/shixiongfei/pgqueue.js#readme",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "knex": "^3.1.0",
+    "pg": "^8.11.3"
+  }
+}
