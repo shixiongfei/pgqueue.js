@@ -17,21 +17,21 @@ pg.types.setTypeParser(pg.types.builtins.INT8, BigInt);
 import { default as knex } from "knex";
 import { ulid } from "ulid";
 
-export type PgSQLType = ReturnType<typeof knex>;
-
-export type PgMessage = {
+type PgMessage = {
   id: string;
   payload: unknown;
   created_at: Date;
 };
 
+export type PgSQLType = ReturnType<typeof knex>;
+
 export class PgQueue {
   private readonly pgsql: PgSQLType;
   private readonly maintenance: boolean;
-  private readonly name: string;
+  private readonly tableName: string;
 
   private constructor(name: string, pgsql: PgSQLType, maintenance: boolean) {
-    this.name = name;
+    this.tableName = `pq_${name}`;
     this.pgsql = pgsql;
     this.maintenance = maintenance;
   }
@@ -85,7 +85,7 @@ export class PgQueue {
   }
 
   async produce<T>(payloads: T[]) {
-    await this.pgsql<PgMessage>(`pq_${this.name}`).insert(
+    await this.pgsql<PgMessage>(this.tableName).insert(
       payloads.map((payload) => ({
         id: ulid(),
         payload: JSON.stringify(payload),
@@ -96,13 +96,11 @@ export class PgQueue {
   }
 
   async consume<T>(seconds: number) {
-    const tableName = `pq_${this.name}`;
-
     return this.pgsql.transaction(async (trx) => {
-      const row = await trx<PgMessage & { visible_at: Date }>(tableName)
+      const rows = await trx<PgMessage & { visible_at: Date }>(this.tableName)
         .where(
           "id",
-          trx<PgMessage>(tableName)
+          trx<PgMessage>(this.tableName)
             .select("id")
             .where("visible_at", "<", trx.fn.now())
             .orderBy("created_at", "asc")
@@ -116,16 +114,16 @@ export class PgQueue {
           "*",
         );
 
-      if (row.length === 0) {
+      if (rows.length === 0) {
         return undefined;
       }
 
-      return [row[0].id, row[0].payload] as [string, T];
+      return [rows[0].id, rows[0].payload] as [string, T];
     });
   }
 
   async ack(id: string) {
-    await this.pgsql<PgMessage>(`pq_${this.name}`).where({ id }).delete();
+    await this.pgsql<PgMessage>(this.tableName).where({ id }).delete();
 
     return this;
   }
