@@ -1,5 +1,5 @@
 {
-  "name": "pgqueue",
+  "name": "pgqueue-js",
   "version": "0.1.0",
   "description": "A reliable message queue base on PostgreSQL",
   "main": "./lib/src/index.js",
