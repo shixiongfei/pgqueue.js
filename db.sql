@@ -20,5 +20,5 @@ CREATE TABLE pgqueue_table
 );
 CREATE INDEX ix_pgqueue_table_visible_at
     ON pgqueue_table USING btree
-    (visible_at ASC NULLS LAST)
+    (visible_at, created_at ASC NULLS LAST)
 ;

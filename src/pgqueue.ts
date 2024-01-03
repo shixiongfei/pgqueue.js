@@ -15,13 +15,13 @@ pg.types.setTypeParser(pg.types.builtins.NUMERIC, Number);
 pg.types.setTypeParser(pg.types.builtins.INT8, BigInt);
 
 import { default as knex } from "knex";
+import { ulid } from "ulid";
 
 export type PgSQLType = ReturnType<typeof knex>;
 
 export type PgMessage = {
   id: string;
   payload: unknown;
-  visible_at: Date;
   created_at: Date;
 };
 
@@ -82,5 +82,51 @@ export class PgQueue {
     if (this.maintenance) {
       await this.pgsql.destroy();
     }
+  }
+
+  async produce<T>(payloads: T[]) {
+    await this.pgsql<PgMessage>(`pq_${this.name}`).insert(
+      payloads.map((payload) => ({
+        id: ulid(),
+        payload: JSON.stringify(payload),
+      })),
+    );
+
+    return this;
+  }
+
+  async consume<T>(seconds: number) {
+    const tableName = `pq_${this.name}`;
+
+    return this.pgsql.transaction(async (trx) => {
+      const row = await trx<PgMessage & { visible_at: Date }>(tableName)
+        .where(
+          "id",
+          trx<PgMessage>(tableName)
+            .select("id")
+            .where("visible_at", "<", trx.fn.now())
+            .orderBy("created_at", "asc")
+            .limit(1)
+            .forUpdate()
+            .skipLocked(),
+        )
+        .update(
+          "visible_at",
+          trx.raw(`CURRENT_TIMESTAMP + INTERVAL '${seconds} seconds'`),
+          "*",
+        );
+
+      if (row.length === 0) {
+        return undefined;
+      }
+
+      return [row[0].id, row[0].payload] as [string, T];
+    });
+  }
+
+  async ack(id: string) {
+    await this.pgsql<PgMessage>(`pq_${this.name}`).where({ id }).delete();
+
+    return this;
   }
 }
