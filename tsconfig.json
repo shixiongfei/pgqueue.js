@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "target": "ES5",
-    "baseUrl": ".",
+    "baseUrl": "src",
     "outDir": "lib",
     "declaration": true,
     "esModuleInterop": true,
@@ -13,6 +13,5 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "sourceMap": true
-  },
-  "exclude": ["lib"]
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * test.ts
+ * index.test.ts
  *
  * Copyright (c) 2023-2024 Xiongfei Shi
  *
@@ -9,7 +9,7 @@
  * https://github.com/shixiongfei/pgqueue.js
  */
 
-import { PgQueue } from "../src/index.js";
+import { PgQueue } from "./index.js";
 
 const pgUrl = "postgres://postgres:123456@127.0.0.1:5432/pqtest";
 
