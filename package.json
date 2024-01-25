@@ -4,6 +4,11 @@
   "description": "A reliable message queue base on PostgreSQL",
   "main": "./lib/src/index.js",
   "types": "./lib/src/index.d.ts",
+  "files": [
+    "lib/",
+    "src/",
+    "test/"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "tsc -w",
